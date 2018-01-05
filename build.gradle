@@ -5,14 +5,19 @@ buildscript {
 			name = "forge"
 			url = "http://files.minecraftforge.net/maven"
 		}
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
 	}
 	dependencies {
 		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+		classpath "gradle.plugin.net.minecrell:licenser:0.3"
 	}
 }
 
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'maven'
+apply plugin: 'net.minecrell.licenser'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
@@ -54,6 +59,23 @@ repositories {
 
 dependencies {
 	deobfCompile "pl.asie.charset:charset:0.5.0.119"
+}
+
+license {
+	sourceSets = [project.sourceSets.main]
+	header = project.file("docs/licenses/LICENSE")
+	ignoreFailures = true
+	exclude '**/*.lang'
+	exclude '**/*.info'
+	exclude '**/*.mcmeta'
+}
+
+sourceSets {
+	main {
+		resources {
+			srcDirs += 'docs'
+		}
+	}
 }
 
 processResources {
