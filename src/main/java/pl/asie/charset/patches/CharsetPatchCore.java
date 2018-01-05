@@ -9,7 +9,7 @@ import java.io.File;
 import java.util.Map;
 
 @IFMLLoadingPlugin.SortingIndex(1001)
-@IFMLLoadingPlugin.TransformerExclusions({"pl.asie.charset.patches", "pl.asie.charset.patchwork", "pl.asie.charset.module.laser.system.LaserRedstoneHelper"})
+@IFMLLoadingPlugin.TransformerExclusions({"pl.asie.charset.patches", "pl.asie.charset.patchwork"})
 public class CharsetPatchCore implements IFMLLoadingPlugin {
 	@Override
 	public String[] getASMTransformerClass() {

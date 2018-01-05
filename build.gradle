@@ -17,7 +17,7 @@ apply plugin: 'maven'
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
-version = "0.1.0"
+version = "0.1.1"
 group = "pl.asie.charset.patches"
 archivesBaseName = "CharsetPatches"
 
@@ -33,12 +33,12 @@ dependencies {
 }
 
 minecraft {
-	version = "1.12.1-14.22.0.2452"
+	version = "1.12.2-14.23.1.2581"
 
 	runDir = "run"
 	useDepAts = true
 	makeObfSourceJar = false
-	mappings = "snapshot_20170812"
+	mappings = "snapshot_20171225"
 
 	replace '@VERSION@', project.version
 	replace '@MC_VERSION@', version
@@ -46,9 +46,14 @@ minecraft {
 
 repositories {
 	mavenCentral()
+	maven {
+		name = "Elytra Maven"
+		url = "http://repo.elytradev.com"
+	}
 }
 
 dependencies {
+	deobfCompile "pl.asie.charset:charset:0.5.0.119"
 }
 
 processResources {

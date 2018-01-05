@@ -27,7 +27,7 @@ public class CharsetPatchTransformer implements IClassTransformer {
 		                            String desc, boolean itf) {
 			if (Opcodes.INVOKEVIRTUAL == opcode && "net/minecraft/world/World".equals(owner)
 					&& ("getRedstonePower".equals(name) || "func_175651_c".equals(name))) {
-				super.visitMethodInsn(Opcodes.INVOKESTATIC, "pl/asie/charset/module/laser/system/LaserRedstoneHelper", "getRedstonePower",
+				super.visitMethodInsn(Opcodes.INVOKESTATIC, "pl/asie/charset/patchwork/LaserRedstoneHook", "getRedstonePower",
 						"(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;)I", false);
 			} else {
 				super.visitMethodInsn(opcode, owner, name, desc, itf);
