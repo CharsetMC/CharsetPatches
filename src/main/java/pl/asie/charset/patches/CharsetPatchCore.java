@@ -21,7 +21,6 @@ package pl.asie.charset.patches;
 
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
-import pl.asie.charset.patchwork.CharsetPatchwork;
 
 import javax.annotation.Nullable;
 import java.io.File;

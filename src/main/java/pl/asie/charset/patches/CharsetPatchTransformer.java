@@ -21,7 +21,6 @@ package pl.asie.charset.patches;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 import org.objectweb.asm.*;
-import pl.asie.charset.patchwork.CharsetPatchwork;
 
 public class CharsetPatchTransformer implements IClassTransformer {
 	public static class RedstoneClassVistor extends ClassVisitor {

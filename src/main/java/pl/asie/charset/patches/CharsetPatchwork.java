@@ -17,7 +17,7 @@
  * along with Charset.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package pl.asie.charset.patchwork;
+package pl.asie.charset.patches;
 
 public class CharsetPatchwork {
 	public static boolean LASER_REDSTONE = false;
