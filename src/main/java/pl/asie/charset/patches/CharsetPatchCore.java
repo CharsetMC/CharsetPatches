@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Adrian Siekierka
+ * Copyright (c) 2017, 2018 Adrian Siekierka
  *
  * This file is part of CharsetPatches.
  *
