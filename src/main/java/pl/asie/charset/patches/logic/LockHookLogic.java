@@ -20,6 +20,7 @@
 package pl.asie.charset.patches.logic;
 
 import com.google.common.io.ByteStreams;
+import com.sun.org.apache.bcel.internal.generic.INVOKEVIRTUAL;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -29,6 +30,7 @@ import org.objectweb.asm.util.TraceClassVisitor;
 import pl.asie.charset.patches.CharsetPatchTransformer;
 
 import javax.annotation.Nullable;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -73,9 +75,11 @@ public final class LockHookLogic {
 	public static MethodNode inject(@Nullable MethodNode method, MethodNode srcMethod, ClassNode target, String srcClassName, String baseClassName) {
 		ListIterator<AbstractInsnNode> it;
 
+		String suffix = "_postCharset";
+
 		System.out.println("Injecting " + srcMethod.name + " hook into " + target.name);
 		if (method != null) {
-			method.name += "_postCharset";
+			method.name += suffix;
 			it = method.instructions.iterator();
 			while (it.hasNext()) {
 				AbstractInsnNode node = it.next();
@@ -83,7 +87,7 @@ public final class LockHookLogic {
 					MethodInsnNode methodInsnNode = (MethodInsnNode) node;
 					if (methodInsnNode.name.equals(srcMethod.name) && methodInsnNode.desc.equals(srcMethod.desc)) {
 						if (CharsetPatchTransformer.isExtends(methodInsnNode.owner.replace('/', '.'), baseClassName.replace('/', '.'))) {
-							methodInsnNode.name += "_postCharset";
+							methodInsnNode.name += suffix;
 						}
 					}
 				}
@@ -123,10 +127,11 @@ public final class LockHookLogic {
 			} else if (node instanceof MethodInsnNode) {
 				MethodInsnNode methodInsnNode = (MethodInsnNode) node;
 				if (srcClassName.equals(methodInsnNode.owner)) {
+					int opc = methodInsnNode.getOpcode();
 					node = new MethodInsnNode(
-							methodInsnNode.getOpcode(),
+							opc == Opcodes.INVOKEVIRTUAL && methodInsnNode.name.endsWith("_postCharset") ? Opcodes.INVOKESPECIAL : opc,
 							target.name,
-							methodInsnNode.name,
+							methodInsnNode.name.endsWith("_postCharset") ? methodInsnNode.name.replaceAll("_postCharset", suffix) : methodInsnNode.name,
 							methodInsnNode.desc,
 							methodInsnNode.itf
 					);
@@ -217,8 +222,10 @@ public final class LockHookLogic {
 		}
 
 		target.methods.addAll(newMethods);
-		/* if (target.name.endsWith("Chest")) {
-			target.accept(new TraceClassVisitor(new PrintWriter(System.out)));
-		} */
+		try {
+			target.accept(new TraceClassVisitor(new PrintWriter(new FileOutputStream("./" + target.name.replaceAll("[^a-zA-Z]", "_")))));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
