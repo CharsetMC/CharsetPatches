@@ -20,7 +20,6 @@
 package pl.asie.charset.patches.logic;
 
 import com.google.common.io.ByteStreams;
-import com.sun.org.apache.bcel.internal.generic.INVOKEVIRTUAL;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -131,7 +130,8 @@ public final class LockHookLogic {
 					node = new MethodInsnNode(
 							opc == Opcodes.INVOKEVIRTUAL && methodInsnNode.name.endsWith("_postCharset") ? Opcodes.INVOKESPECIAL : opc,
 							target.name,
-							methodInsnNode.name.endsWith("_postCharset") ? methodInsnNode.name.replaceAll("_postCharset", suffix) : methodInsnNode.name,
+							methodInsnNode.name,
+							/* methodInsnNode.name.endsWith("_postCharset") ? methodInsnNode.name.replaceAll("_postCharset", suffix) : methodInsnNode.name, */
 							methodInsnNode.desc,
 							methodInsnNode.itf
 					);
@@ -222,10 +222,10 @@ public final class LockHookLogic {
 		}
 
 		target.methods.addAll(newMethods);
-		try {
+		/* try {
 			target.accept(new TraceClassVisitor(new PrintWriter(new FileOutputStream("./" + target.name.replaceAll("[^a-zA-Z]", "_")))));
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		} */
 	}
 }
