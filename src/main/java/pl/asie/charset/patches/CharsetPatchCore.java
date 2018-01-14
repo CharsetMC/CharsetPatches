@@ -50,6 +50,11 @@ public class CharsetPatchCore implements IFMLLoadingPlugin {
 		Configuration config = new Configuration(new File(new File(new File("config"), "charset"), "patches.cfg"));
 
 		CharsetPatchwork.LASER_REDSTONE = config.getBoolean("laserRedstone", "patches", true, "Allows lasers to act as redstone input.");
+		CharsetPatchwork.LOCKS_BLOCK_CAPABILITIES = config.getBoolean("locksBlockCaps", "patches", false, "Allows locks to block capabilities and inventory access. Opt-in - fairly invasive, but server administrators may find it handy.");
+
+		if (config.hasChanged()) {
+			config.save();
+		}
 	}
 
 	@Override

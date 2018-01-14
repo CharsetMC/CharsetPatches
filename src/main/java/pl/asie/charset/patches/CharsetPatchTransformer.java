@@ -19,38 +19,82 @@
 
 package pl.asie.charset.patches;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import net.minecraft.launchwrapper.IClassTransformer;
+import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 import org.objectweb.asm.*;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.util.TraceClassVisitor;
+import pl.asie.charset.patches.logic.LaserRedstoneLogic;
+import pl.asie.charset.patches.logic.LockHookLogic;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CharsetPatchTransformer implements IClassTransformer {
-	public static class RedstoneClassVistor extends ClassVisitor {
-		public RedstoneClassVistor(int api, ClassVisitor cv) {
-			super(api, cv);
-		}
+	private static Map<String, String> superclassMap = new HashMap<>();
+	private static Multimap<String, String> interfaceMap = HashMultimap.create();
 
-		@Override
-		public MethodVisitor visitMethod(int access, String name, String desc,
-		                                 String signature, String[] exceptions) {
-			return new RedstoneMethodVisitor(api, super.visitMethod(access, name, desc, signature, exceptions));
+	public static void addClass(String currC) {
+		if (!superclassMap.containsKey(currC)) {
+			String filename = FMLDeobfuscatingRemapper.INSTANCE.unmap(currC);
+			filename = filename.replace('.', '/') + ".class";
+			InputStream stream = CharsetPatchTransformer.class.getClassLoader().getResourceAsStream(filename);
+			if (stream != null) {
+				try {
+					ClassReader reader = new ClassReader(stream);
+					String newC = reader.getSuperName();
+					if (newC != null) {
+						newC = newC.replace('/', '.');
+					}
+					superclassMap.put(currC, newC);
+					for (String s : reader.getInterfaces()) {
+						interfaceMap.put(currC, s.replace('/', '.'));
+					}
+				} catch (IOException e) {
+					superclassMap.put(currC, null);
+				}
+			} else {
+				superclassMap.put(currC, null);
+			}
 		}
 	}
 
-	public static class RedstoneMethodVisitor extends MethodVisitor {
-		public RedstoneMethodVisitor(int api, MethodVisitor mv) {
-			super(api, mv);
-		}
-
-		@Override
-		public void visitMethodInsn(int opcode, String owner, String name,
-		                            String desc, boolean itf) {
-			if (Opcodes.INVOKEVIRTUAL == opcode && "net/minecraft/world/World".equals(owner)
-					&& ("getRedstonePower".equals(name) || "func_175651_c".equals(name))) {
-				super.visitMethodInsn(Opcodes.INVOKESTATIC, "pl/asie/charset/patchwork/LaserRedstoneHook", "getRedstonePower",
-						"(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;)I", false);
+	public static boolean isImplements(String c, String sc) {
+		String currC = c;
+		while (currC != null && currC.length() > 0) {
+			if (currC.equals(sc)) {
+				return true;
 			} else {
-				super.visitMethodInsn(opcode, owner, name, desc, itf);
+				addClass(currC);
+				for (String s : interfaceMap.get(currC)) {
+					if (isImplements(s, sc)) {
+						return true;
+					}
+				}
+				currC = superclassMap.get(currC);
 			}
 		}
+
+		return false;
+	}
+
+	public static boolean isExtends(String c, String sc) {
+		String currC = c;
+		while (currC != null && currC.length() > 0) {
+			if (currC.equals(sc)) {
+				return true;
+			} else {
+				addClass(currC);
+				currC = superclassMap.get(currC);
+			}
+		}
+
+		return false;
 	}
 
 	@Override
@@ -59,15 +103,28 @@ public class CharsetPatchTransformer implements IClassTransformer {
 			return basicClass;
 
 		ClassReader reader = new ClassReader(basicClass);
-		ClassWriter writer = new ClassWriter(Opcodes.ASM5);
-		ClassVisitor target = writer;
+
+		boolean applyLockHook = CharsetPatchwork.LOCKS_BLOCK_CAPABILITIES && isExtends(transformedName, "net.minecraft.tileentity.TileEntity");
+		boolean requiresClassNode = applyLockHook;
+		ClassNode node = new ClassNode();
+		ClassWriter writer = new ClassWriter(0);
+
+		ClassVisitor target = requiresClassNode ? node : writer;
 		if (CharsetPatchwork.LASER_REDSTONE) {
-			target = new RedstoneClassVistor(Opcodes.ASM5, writer);
+			target = new LaserRedstoneLogic.MyClassVisitor(Opcodes.ASM5, target);
 		}
 		if (target == writer) {
 			return basicClass;
 		}
 		reader.accept(target, 0);
+
+		if (applyLockHook) {
+			LockHookLogic.patch(node, "tile", "net.minecraft.tileentity.TileEntity".equals(transformedName));
+		}
+
+		if (requiresClassNode) {
+			node.accept(writer);
+		}
 		return writer.toByteArray();
 	}
 }

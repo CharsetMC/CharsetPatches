@@ -20,5 +20,6 @@
 package pl.asie.charset.patches;
 
 public class CharsetPatchwork {
+	public static boolean LOCKS_BLOCK_CAPABILITIES = false;
 	public static boolean LASER_REDSTONE = false;
 }
