@@ -22,7 +22,7 @@ apply plugin: 'net.minecrell.licenser'
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
-version = "0.1.4"
+version = "0.1.5"
 group = "pl.asie.charset.patches"
 archivesBaseName = "CharsetPatches"
 
@@ -38,12 +38,12 @@ dependencies {
 }
 
 minecraft {
-	version = "1.12.2-14.23.1.2587"
+	version = "1.12.2-14.23.4.2739"
 
 	runDir = "run"
 	useDepAts = true
 	makeObfSourceJar = false
-	mappings = "snapshot_20180111"
+	mappings = "snapshot_20180722"
 
 	replace '@VERSION@', project.version
 	replace '@MC_VERSION@', version
@@ -58,7 +58,7 @@ repositories {
 }
 
 dependencies {
-	deobfCompile "pl.asie.charset:charset:0.5.0.139"
+	deobfCompile "pl.asie.charset:charset:0.5.0.140"
 }
 
 license {

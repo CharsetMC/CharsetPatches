@@ -39,11 +39,9 @@ public class LockHooks implements ISidedInventory, ICapabilityProvider {
 	@Override
 	@Hook(target = "tile")
 	public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
-		if (facing != null) {
-			LocksCapabilityHook.Result result = LocksCapabilityHook.handler.wrapCapability((TileEntity) ((Object) this), capability, facing);
-			if (result.captures()) {
-				return result.canApply();
-			}
+		LocksCapabilityHook.Result result = LocksCapabilityHook.handler.wrapCapability((TileEntity) ((Object) this), capability, facing);
+		if (result.captures()) {
+			return result.canApply();
 		}
 		return this.hasCapability_postCharset(capability, facing);
 	}
@@ -54,11 +52,9 @@ public class LockHooks implements ISidedInventory, ICapabilityProvider {
 	@Hook(target = "tile")
 	public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
 		T result = this.getCapability_postCharset(capability, facing);
-		if (facing != null) {
-			LocksCapabilityHook.Result lockResult = LocksCapabilityHook.handler.wrapCapability((TileEntity) ((Object) this), capability, facing);
-			if (lockResult.captures()) {
-				return lockResult.canApply() ? (T) lockResult.apply(result) : null;
-			}
+		LocksCapabilityHook.Result lockResult = LocksCapabilityHook.handler.wrapCapability((TileEntity) ((Object) this), capability, facing);
+		if (lockResult.captures()) {
+			return lockResult.canApply() ? (T) lockResult.apply(result) : null;
 		}
 		return result;
 	}
@@ -76,7 +72,7 @@ public class LockHooks implements ISidedInventory, ICapabilityProvider {
 	@Override
 	@Hook(target = "tile")
 	public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
-		if (direction != null && LocksCapabilityHook.handler.wrapCapability((TileEntity) ((Object) this), CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction).captures()) {
+		if (LocksCapabilityHook.handler.wrapCapability((TileEntity) ((Object) this), CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction).captures()) {
 			return false;
 		}
 		return this.canInsertItem_postCharset(index, itemStackIn, direction);
@@ -85,7 +81,7 @@ public class LockHooks implements ISidedInventory, ICapabilityProvider {
 	@Override
 	@Hook(target = "tile")
 	public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
-		if (direction != null && LocksCapabilityHook.handler.wrapCapability((TileEntity) ((Object) this), CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction).captures()) {
+		if (LocksCapabilityHook.handler.wrapCapability((TileEntity) ((Object) this), CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction).captures()) {
 			return false;
 		}
 		return this.canExtractItem_postCharset(index, stack, direction);
