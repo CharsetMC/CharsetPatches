@@ -41,7 +41,7 @@ public class CharsetPatchTransformer implements IClassTransformer {
 
 	public static void addClass(String currC) {
 		if (!superclassMap.containsKey(currC)) {
-			String filename = FMLDeobfuscatingRemapper.INSTANCE.unmap(currC);
+			String filename = FMLDeobfuscatingRemapper.INSTANCE.unmap(currC.replace('.', '/'));
 			filename = filename.replace('.', '/') + ".class";
 			InputStream stream = CharsetPatchTransformer.class.getClassLoader().getResourceAsStream(filename);
 			if (stream != null) {
@@ -49,16 +49,19 @@ public class CharsetPatchTransformer implements IClassTransformer {
 					ClassReader reader = new ClassReader(stream);
 					String newC = reader.getSuperName();
 					if (newC != null) {
-						newC = newC.replace('/', '.');
+						newC = FMLDeobfuscatingRemapper.INSTANCE.map(newC).replace('/', '.');
+						superclassMap.put(currC, newC);
 					}
-					superclassMap.put(currC, newC);
 					for (String s : reader.getInterfaces()) {
-						interfaceMap.put(currC, s.replace('/', '.'));
+						String newI = FMLDeobfuscatingRemapper.INSTANCE.map(s).replace('/', '.');
+						interfaceMap.put(currC, newI);
 					}
 				} catch (IOException e) {
+					e.printStackTrace();
 					superclassMap.put(currC, null);
 				}
 			} else {
+				System.err.println("Could not find " + filename + "!");
 				superclassMap.put(currC, null);
 			}
 		}
