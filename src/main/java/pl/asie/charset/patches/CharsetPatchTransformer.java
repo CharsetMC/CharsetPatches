@@ -26,6 +26,7 @@ import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRema
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.util.TraceClassVisitor;
+import pl.asie.charset.patches.logic.CanPushLogic;
 import pl.asie.charset.patches.logic.LaserRedstoneLogic;
 import pl.asie.charset.patches.logic.LockHookLogic;
 
@@ -108,11 +109,15 @@ public class CharsetPatchTransformer implements IClassTransformer {
 		ClassReader reader = new ClassReader(basicClass);
 
 		boolean applyLockHook = CharsetPatchwork.LOCKS_BLOCK_CAPABILITIES && isExtends(transformedName, "net.minecraft.tileentity.TileEntity");
+		boolean applyPushHook = transformedName.equals("net.minecraft.block.BlockPistonBase");
 		boolean requiresClassNode = applyLockHook;
 		ClassNode node = new ClassNode();
-		ClassWriter writer = new ClassWriter(0);
+		ClassWriter writer = new ClassWriter(applyPushHook ? ClassWriter.COMPUTE_FRAMES : 0);
 
 		ClassVisitor target = requiresClassNode ? node : writer;
+		if (applyPushHook) {
+			target = new CanPushLogic.MyClassVisitor(Opcodes.ASM5, target);
+		}
 		if (CharsetPatchwork.LASER_REDSTONE) {
 			target = new LaserRedstoneLogic.MyClassVisitor(Opcodes.ASM5, target);
 		}

@@ -22,7 +22,7 @@ apply plugin: 'net.minecrell.licenser'
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
-version = "0.1.6"
+version = "0.1.7"
 group = "pl.asie.charset.patches"
 archivesBaseName = "CharsetPatches"
 
@@ -38,12 +38,12 @@ dependencies {
 }
 
 minecraft {
-	version = "1.12.2-14.23.4.2739"
+	version = "1.12.2-14.23.5.2838"
 
 	runDir = "run"
 	useDepAts = true
 	makeObfSourceJar = false
-	mappings = "snapshot_20180722"
+	mappings = "stable_39"
 
 	replace '@VERSION@', project.version
 	replace '@MC_VERSION@', version
@@ -51,14 +51,14 @@ minecraft {
 
 repositories {
 	mavenCentral()
-	maven {
-		name = "Elytra Maven"
-		url = "https://repo.elytradev.com"
+	ivy {
+		name 'asie dependency mirror'
+		artifactPattern "http://asie.pl/javadeps/[module]-[revision](-[classifier]).[ext]"
 	}
 }
 
 dependencies {
-	deobfCompile "pl.asie.charset:charset:0.5.0.140"
+	deobfCompile name: "charset", version: "0560alpha"
 }
 
 license {
@@ -108,17 +108,17 @@ if (file('private.gradle').exists()) {
 	apply from: 'private.gradle'
 }
 
-task signJar(type: SignJar, dependsOn: jar) {
-    onlyIf {
-        project.hasProperty('keyStore')
-    }
+//task signJar(type: SignJar, dependsOn: jar) {
+//    onlyIf {
+//        project.hasProperty('keyStore')
+//    }
 
-    keyStore = project.keyStore
-    alias = project.keyStoreAlias
-    storePass = project.keyStorePass
-    keyPass = project.keyStoreKeyPass
-    inputFile = jar.archivePath
-    outputFile = jar.archivePath
-}
+//    keyStore = project.keyStore
+//    alias = project.keyStoreAlias
+//    storePass = project.keyStorePass
+//    keyPass = project.keyStoreKeyPass
+//    inputFile = jar.archivePath
+//    outputFile = jar.archivePath
+//}
 
-build.dependsOn(signJar)
+//build.dependsOn(signJar)

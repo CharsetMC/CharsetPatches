@@ -20,6 +20,7 @@
 package pl.asie.charset.patches.logic;
 
 import com.google.common.io.ByteStreams;
+import net.minecraftforge.fml.common.asm.transformers.deobf.FMLDeobfuscatingRemapper;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -86,7 +87,7 @@ public final class LockHookLogic {
 					MethodInsnNode methodInsnNode = (MethodInsnNode) node;
 					if (methodInsnNode.name.equals(srcMethod.name) && methodInsnNode.desc.equals(srcMethod.desc)) {
 						if (CharsetPatchTransformer.isExtends(methodInsnNode.owner.replace('/', '.'), baseClassName.replace('/', '.'))) {
-							methodInsnNode.name += suffix;
+							methodInsnNode.name = postCharsetify(methodInsnNode);
 						}
 					}
 				}
@@ -174,6 +175,16 @@ public final class LockHookLogic {
 			newMethod.instructions.add(node);
 		}
 		return newMethod;
+	}
+
+	private static String postCharsetify(MethodInsnNode methodInsnNode) {
+		if (methodInsnNode.name.equals("func_180461_b")) {
+			return "canExtractItem_postCharset";
+		} else if (methodInsnNode.name.equals("func_180462_a")) {
+			return "canInsertItem_postCharset";
+		} else {
+			return methodInsnNode.name + "_postCharset";
+		}
 	}
 
 	public static void patch(ClassNode target, String type, boolean isBase) {
